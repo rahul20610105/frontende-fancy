@@ -1,19 +1,29 @@
-// ProtectedRoute.jsx
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+// src/pages/ProtectedRoutes.jsx
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
 const ProtectedRoute = () => {
-  // Get the user data from localStorage
-  const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem('token');
 
-  // Check if user is authenticated and has the isAdmin role
-  if (!user || !user.isAdmin) {
-    // If not, redirect to login page
-    return <Navigate to="/login" replace />;
-  }
+    if (!token) {
+        // If no token is found, redirect to login
+        return <Navigate to="/login" replace />;
+    }
 
-  // If authenticated and isAdmin, render the protected route
-  return <Outlet />;
+    try {
+        const decodedToken = jwtDecode(token);
+        
+        // Check if user is admin
+        if (decodedToken.isAdmin) {
+            return <Outlet />; // Render the child route if the user is an admin
+        } else {
+            return <Navigate to="/" replace />; // Redirect if not an admin
+        }
+    } catch (error) {
+        console.error('Invalid token:', error);
+        return <Navigate to="/login" replace />;
+    }
 };
 
 export default ProtectedRoute;

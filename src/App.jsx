@@ -1,4 +1,3 @@
-// App.jsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Collection from "./pages/Collection";
@@ -20,7 +19,7 @@ import TeamPage from "./pages/Team";
 import Settings from "./pages/Settings";
 import ProductTable from "./pages/ProductTable";
 import AdminPage from "./pages/AdminPage";
-import ProtectedRoute from "../src/pages/ProtectedRoutes"; // Import ProtectedRoute
+import ProtectedRoute from "./pages/ProtectedRoutes"; // Import ProtectedRoute
 
 const App = () => {
   return (
@@ -42,8 +41,8 @@ const App = () => {
             <Route path="/place-order" element={<PlaceOrder />} />
             <Route path="/latestCollection" element={<LatestCollection />} />
             <Route path="/product/:id" element={<ProductItem />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/order-history" element={<Orders />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/order-history" element={<Orders />} />
 
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
