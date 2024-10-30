@@ -1,73 +1,111 @@
+// Signup.jsx
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Link, IconButton, Checkbox, FormControlLabel } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-const SignUp = () => {
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);  // Checkbox for admin status
-  const [adminKey, setAdminKey] = useState('');   // Extra field for admin verification
-  const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+const Signup = () => {
+    const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('https://backende-fancy.onrender.com/api/user/register', {
-        username,
-        name,
-        email,
-        password,
-        isAdmin,        // Send admin status to backend
-        adminKey        // Send admin key for verification
-      });
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
 
-      if (response.data.success) {
-        navigate('/login');
-      } else {
-        setError(response.data.message);
-      }
-    } catch (err) {
-      console.error("Error during signup:", err);
-      setError("An error occurred. Please try again.");
-    }
-  };
+        try {
+            const response = await axios.post('http://localhost:8080/api/user/register', {
+                name,
+                username,
+                email,
+                password,
+                confirmPassword
+            });
 
-  return (
-    <Container maxWidth="sm" sx={{ marginTop: 8 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: 3, boxShadow: 3, borderRadius: 2 }}>
-        <Typography variant="h4" sx={{ mb: 3 }}>Sign Up</Typography>
-        <form onSubmit={handleSignUp}>
-          <TextField label="Name" variant="outlined" fullWidth margin="normal" value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField label="Email" variant="outlined" fullWidth margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <TextField label="Username" variant="outlined" fullWidth margin="normal" value={username} onChange={(e) => setUsername(e.target.value)} />
-          <TextField label="Password" type={showPassword ? 'text' : 'password'} variant="outlined" fullWidth margin="normal" value={password} onChange={(e) => setPassword(e.target.value)} InputProps={{
-            endAdornment: (
-              <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" aria-label="toggle password visibility">
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            ),
-          }} />
-          {/* Checkbox for admin registration */}
-          <FormControlLabel control={<Checkbox checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} />} label="Register as Admin" />
-          {isAdmin && (
-            <TextField label="Admin Key" variant="outlined" fullWidth margin="normal" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} />
-          )}
-          {error && <Typography color="error" variant="body2" sx={{ mt: 1 }}>{error}</Typography>}
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>Sign Up</Button>
-        </form>
-        <Box sx={{ mt: 2 }}>
-          <Link component={RouterLink} to="/login" variant="body2" underline="hover" style={{ textDecoration: 'none' }}>Already have an account? Login</Link>
-        </Box>
-      </Box>
-    </Container>
-  );
+            if (response.data.success) {
+                setSuccess('Account created successfully!');
+                // Optionally redirect to login or home page
+                // navigate('/login'); // Uncomment if you use react-router
+            }
+        } catch (error) {
+            if (error.response && error.response.data) {
+                setError(error.response.data.message || 'Signup failed!');
+            } else {
+                setError('An unexpected error occurred.');
+            }
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="bg-white p-6 rounded-lg shadow-md w-96">
+                <h2 className="text-2xl font-semibold text-center">Sign Up</h2>
+                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
+                <form onSubmit={handleSubmit} className="mt-4">
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Name</label>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Username</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Email</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Confirm Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Sign Up
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
 };
 
-export default SignUp;
+export default Signup;

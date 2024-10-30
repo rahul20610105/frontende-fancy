@@ -1,118 +1,79 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Link, IconButton, InputAdornment } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext'; // Adjust the import path to your AuthContext
-import { jwtDecode } from 'jwt-decode'; // Correct import for jwtDecode
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
-  const { login } = useAuth(); // Use the login method from AuthContext
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const navigate = useNavigate(); // Initialize useNavigate
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('https://backende-fancy.onrender.com/api/user/login', { email, password });
-      if (response.data.success) {
-        console.log('Login successful');
-        login(response.data.token); // Call the login function from context
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         setError('');
+        setSuccess('');
 
-        // Check if the user is an admin based on the decoded token
-        const decoded = jwtDecode(response.data.token);
-        if (decoded.isAdmin) {
-          navigate('/admin'); // Navigate to the admin page for admins
-        } else {
-          navigate('/'); // Redirect to the homepage for regular users
+        try {
+            const response = await axios.post('http://localhost:8080/api/user/login', {
+                username,
+                password
+            });
+
+            if (response.data.token) {
+                // Save the token in local storage or cookies as needed
+                localStorage.setItem('token', response.data.token);
+                setSuccess('Login successful! Redirecting...');
+                
+                // Redirect to the home page
+                navigate('/'); // Navigate to the home page
+            }
+        } catch (error) {
+            if (error.response && error.response.data) {
+                setError(error.response.data.message || 'Login failed!');
+            } else {
+                setError('An unexpected error occurred.');
+            }
         }
-      } else {
-        setError(response.data.message);
-      }
-    } catch (err) {
-      console.error('Error during login:', err);
-      setError('Error occurred. Please try again.');
-    }
-  };
+    };
 
-  const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  return (
-    <Container maxWidth="sm" sx={{ marginTop: 8 }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: 3,
-          boxShadow: 3,
-          borderRadius: 2,
-        }}
-      >
-        <Typography variant="h4" sx={{ mb: 3 }}>
-          Login
-        </Typography>
-        <form onSubmit={handleLogin}>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleClickShowPassword}
-                    edge="end"
-                    aria-label="toggle password visibility"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          {error && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {error}
-            </Typography>
-          )}
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Login
-          </Button>
-        </form>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', mt: 2 }}>
-          <Link href="#" variant="body2" underline="hover">
-            Forgot Your Password?
-          </Link>
-          <RouterLink to="/signup" style={{ textDecoration: 'none' }}>
-            <Link variant="body2" underline="hover">
-              Don't have an account? Sign Up
-            </Link>
-          </RouterLink>
-        </Box>
-      </Box>
-    </Container>
-  );
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+            <div className="bg-white p-6 rounded-lg shadow-md w-96">
+                <h2 className="text-2xl font-semibold text-center">Login</h2>
+                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
+                <form onSubmit={handleSubmit} className="mt-4">
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Username</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full p-2 border border-gray-300 rounded"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
 };
 
 export default Login;
-
