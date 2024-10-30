@@ -1,6 +1,18 @@
-// Signup.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import {
+    Container,
+    Box,
+    Typography,
+    TextField,
+    Button,
+    Link,
+    Alert,
+    InputAdornment,
+    IconButton
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
     const [name, setName] = useState('');
@@ -10,6 +22,10 @@ const Signup = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,7 +33,7 @@ const Signup = () => {
         setSuccess('');
 
         try {
-            const response = await axios.post('http://localhost:8080/api/user/register', {
+            const response = await axios.post('https://backende-fancy.onrender.com/api/user/register', {
                 name,
                 username,
                 email,
@@ -27,8 +43,7 @@ const Signup = () => {
 
             if (response.data.success) {
                 setSuccess('Account created successfully!');
-                // Optionally redirect to login or home page
-                // navigate('/login'); // Uncomment if you use react-router
+                navigate('/login'); // Redirect to login after 2 seconds
             }
         } catch (error) {
             if (error.response && error.response.data) {
@@ -39,72 +54,131 @@ const Signup = () => {
         }
     };
 
+    const togglePasswordVisibility = () => setShowPassword(!showPassword);
+    const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
+
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white p-6 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-semibold text-center">Sign Up</h2>
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-                {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
-                <form onSubmit={handleSubmit} className="mt-4">
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Username</label>
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Confirm Password</label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <button
+        <Container component="main" maxWidth="xs">
+            <Box
+                sx={{
+                    marginTop: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: 3,
+                    padding: 4,
+                    borderRadius: 2,
+                    bgcolor: 'background.paper'
+                }}
+            >
+                <Typography component="h1" variant="h5" align="center" gutterBottom>
+                    Sign Up
+                </Typography>
+
+                {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
+                {success && <Alert severity="success" sx={{ width: '100%', mb: 2 }}>{success}</Alert>}
+
+                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="name"
+                        label="Name"
+                        name="name"
+                        autoComplete="name"
+                        autoFocus
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="username"
+                        label="Username"
+                        name="username"
+                        autoComplete="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={togglePasswordVisibility} edge="end">
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="confirmPassword"
+                        label="Confirm Password"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        id="confirmPassword"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={toggleConfirmPasswordVisibility} edge="end">
+                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    <Button
                         type="submit"
-                        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        sx={{ mt: 3, mb: 2 }}
                     >
                         Sign Up
-                    </button>
-                </form>
-            </div>
-        </div>
+                    </Button>
+                    <Box display="flex" justifyContent="center" mt={2}>
+                        <Typography variant="body2">
+                            Already have an account?{' '}
+                            <Link href="/login" variant="body2" underline="hover">
+                                Sign in
+                            </Link>
+                        </Typography>
+                    </Box>
+                </Box>
+            </Box>
+        </Container>
     );
 };
 

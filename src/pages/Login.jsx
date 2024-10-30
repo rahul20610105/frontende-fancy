@@ -1,13 +1,27 @@
+// Login.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
+import {
+    Container,
+    Box,
+    Typography,
+    TextField,
+    Button,
+    Link,
+    IconButton,
+    InputAdornment,
+    Alert
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -15,18 +29,17 @@ const Login = () => {
         setSuccess('');
 
         try {
-            const response = await axios.post('http://localhost:8080/api/user/login', {
+            const response = await axios.post('https://backende-fancy.onrender.com/api/user/login', {
                 username,
                 password
             });
 
             if (response.data.token) {
-                // Save the token in local storage or cookies as needed
                 localStorage.setItem('token', response.data.token);
                 setSuccess('Login successful! Redirecting...');
                 
                 // Redirect to the home page
-                navigate('/'); // Navigate to the home page
+                setTimeout(() => navigate('/'), 1500); // Delay for showing success message
             }
         } catch (error) {
             if (error.response && error.response.data) {
@@ -37,42 +50,90 @@ const Login = () => {
         }
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword((prev) => !prev);
+    };
+
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white p-6 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-semibold text-center">Login</h2>
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-                {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
-                <form onSubmit={handleSubmit} className="mt-4">
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Username</label>
-                        <input
-                            type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <button
+        <Container component="main" maxWidth="xs">
+            <Box
+                sx={{
+                    marginTop: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    boxShadow: 3,
+                    padding: 4,
+                    borderRadius: 2,
+                    bgcolor: 'background.paper'
+                }}
+            >
+                <Typography component="h1" variant="h5" align="center" gutterBottom>
+                    Login
+                </Typography>
+
+                {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
+                {success && <Alert severity="success" sx={{ width: '100%', mb: 2 }}>{success}</Alert>}
+
+                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="username"
+                        label="Username"
+                        name="username"
+                        autoComplete="username"
+                        autoFocus
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={togglePasswordVisibility}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
+                    />
+                    <Button
                         type="submit"
-                        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        sx={{ mt: 3, mb: 2 }}
                     >
                         Login
-                    </button>
-                </form>
-            </div>
-        </div>
+                    </Button>
+                    <Box display="flex" justifyContent="space-between" mt={2}>
+                        <Link href="/forgot-password" variant="body2" underline="hover">
+                            Forgot Password?
+                        </Link>
+                        <Link href="/signup" variant="body2" underline="hover">
+                            Don’t have an account? Sign Up
+                        </Link>
+                    </Box>
+                </Box>
+            </Box>
+        </Container>
     );
 };
 
