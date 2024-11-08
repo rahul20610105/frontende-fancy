@@ -20,11 +20,19 @@ import Settings from "./pages/Settings";
 import ProductTable from "./pages/ProductTable";
 import AdminPage from "./pages/AdminPage";
 import ProtectedRoute from "./pages/ProtectedRoutes"; // Import ProtectedRoute
+import { useAuth } from "./context/AuthContext";
 
 const App = () => {
+  const {userRole}=useAuth()
+  const path =window.location.pathname
+  console.log(path.pathname)
+  console.log(userRole)
   return (
     <ShopProvider>
-      <Navbar />
+      {
+        path!=="/admin"?(  <Navbar />):""
+      }
+    
       <div className="flex flex-col min-h-screen">
         <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]">
           <Routes>
@@ -51,7 +59,9 @@ const App = () => {
             </Route>
           </Routes>
         </div>
-        <Footer />
+        {
+        path!=="/admin"?(  <Footer />):""
+      }
       </div>
     </ShopProvider>
   );

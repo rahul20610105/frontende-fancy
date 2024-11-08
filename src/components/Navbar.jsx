@@ -17,6 +17,7 @@ import {
   Button,
   InputBase,
   CircularProgress,
+  debounce,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -40,7 +41,7 @@ const navigation = [
 
 export default function Navbar() {
   const { cartItems } = useContext(ShopContext);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userRole } = useAuth(); // Assume `user` includes role information
   const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -247,6 +248,29 @@ export default function Navbar() {
           </IconButton>
         </Link>
         
+        {/* Admin Dashboard Button */}
+        {isAuthenticated && userRole === "admin" && (
+          <Button
+            color="inherit"
+            component={Link}
+            to="/admin"
+            sx={{
+              backgroundColor: "#FFD700",
+              color: "white",
+              fontWeight: "bold",
+              borderRadius: "8px",
+              padding: "6px 16px",
+              textTransform: "none",
+              "&:hover": { backgroundColor: "#FF4500" },
+              transition: "all 0.3s ease-in-out",
+              ml: 2,
+              alignSelf: "flex-end", // Position on the far-right
+            }}
+          >
+            Admin Dashboard
+          </Button>
+        )}
+
         {/* Authentication Buttons */}
         {!isAuthenticated ? (
           <Box display="flex" alignItems="center" gap={1}>
@@ -265,19 +289,20 @@ export default function Navbar() {
                 transition: "all 0.3s ease-in-out",
               }}
             >
-              Sign In
+              Log In
             </Button>
             <Button
+              color="inherit"
               component={Link}
               to="/signup"
               sx={{
-                backgroundColor: "#FF5733",
+                backgroundColor: "#FFD700",
                 color: "#333",
                 fontWeight: "bold",
                 borderRadius: "8px",
                 padding: "6px 16px",
                 textTransform: "none",
-                "&:hover": { backgroundColor: "#FFB300" },
+                "&:hover": { backgroundColor: "#FFC107" },
                 transition: "all 0.3s ease-in-out",
               }}
             >
@@ -286,53 +311,27 @@ export default function Navbar() {
           </Box>
         ) : (
           <ProfileIcon
-            anchorElUser={anchorElUser}
-            handleOpenUserMenu={handleOpenUserMenu}
-            handleCloseUserMenu={handleCloseUserMenu}
+            anchorEl={anchorElUser}
+            onOpenUserMenu={handleOpenUserMenu}
+            onCloseUserMenu={handleCloseUserMenu}
             handleProfileOptionClick={handleProfileOptionClick}
           />
         )}
       </Toolbar>
-
-      {/* Display Search Results */}
-      {searchVisible && (
-        <Box
-          sx={{
-            padding: "10px",
-            bgcolor: "white",
-            color: "black",
-            position: "absolute",
-            width: "100%",
-          }}
-        >
-          {error ? (
-            <Typography variant="body1" color="error">
-              {error}
-            </Typography>
-          ) : (
-            Array.isArray(searchResults) &&
-            searchResults.map((product) => (
-              <Link
-                key={product._id}
-                to={`/product/${product._id}`}
-                style={{ textDecoration: "none", color: "black" }}
-              >
-                <Typography variant="body1" sx={{ padding: "8px 0" }}>
-                  {product.name}
-                </Typography>
-              </Link>
-            ))
-          )}
-        </Box>
-      )}
-
-      {/* Drawer for Mobile */}
+      {/* Drawer Menu */}
       <Drawer
         anchor="left"
         open={drawerOpen}
         onClose={() => toggleDrawer(false)}
+        sx={{
+          width: "250px",
+          ".MuiDrawer-paper": {
+            width: "250px",
+            backgroundColor: "#FF5733",
+          },
+        }}
       >
-        <List sx={{ width: "250px" }}>
+        <List>
           {navigation.map((item) => (
             <ListItem
               button
@@ -340,6 +339,14 @@ export default function Navbar() {
               component={Link}
               to={item.href}
               onClick={() => toggleDrawer(false)}
+              sx={{
+                color: "white",
+                fontSize: "1.2rem",
+                fontWeight: "bold",
+                borderBottom: "1px solid white",
+                "&:hover": { color: "yellow", backgroundColor: "#FF4500" },
+                transition: "all 0.3s ease-in-out",
+              }}
             >
               {item.name}
             </ListItem>
@@ -348,13 +355,4 @@ export default function Navbar() {
       </Drawer>
     </AppBar>
   );
-}
-
-// Utility function for debounce
-function debounce(func, delay) {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
 }
